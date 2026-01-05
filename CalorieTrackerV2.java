@@ -149,12 +149,12 @@ class CalorieTracker {
         System.out.print("Gender (M/F): ");
         char gender = sc.next().charAt(0);
 
-        // Basal Metabolic Rate calculation
+        // BMRate calculation
         double bmr = (gender == 'M' || gender == 'm')
                 ? 10 * weight + 6.25 * height - 5 * age + 5
                 : 10 * weight + 6.25 * height - 5 * age - 161;
 
-        // Daily calorie requirement (sedentary activity level)
+        // Daily calorie requirement
         calorieGoal = (int) (bmr * 1.2);
 
         // BMI calculation
