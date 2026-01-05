@@ -12,7 +12,7 @@ import java.util.Scanner;
  *  - View, remove, and analyze calorie consumption
  */
 
-class CalorieTracker {
+class CalorieTrackerV2 {
 
     // Maximum number of food entries user can log
     static final int MAX = 100;
@@ -28,7 +28,9 @@ class CalorieTracker {
 
     // Variables to store calculated health data
     static int calorieGoal;   // Daily calorie requirement
-    static double bmi;        // Body Mass Index
+    static double bmi;      // Body Mass Index
+    static String userGoal;   // Lose / Maintain / Gain
+
 
     // ================= FOOD DATABASE =================
     /*
@@ -135,37 +137,81 @@ class CalorieTracker {
      */
     static void setupUserHealth() {
 
-        System.out.println("\n------- USER HEALTH DETAILS -------");
+    System.out.println("\n------- USER HEALTH DETAILS -------");
 
-        System.out.print("Age: ");
-        int age = sc.nextInt();
+    System.out.print("Age: ");
+    int age = sc.nextInt();
 
-        System.out.print("Weight (kg): ");
-        double weight = sc.nextDouble();
+    System.out.print("Weight (kg): ");
+    double weight = sc.nextDouble();
 
-        System.out.print("Height (cm): ");
-        double height = sc.nextDouble();
+    System.out.print("Height (cm): ");
+    double height = sc.nextDouble();
 
-        System.out.print("Gender (M/F): ");
-        char gender = sc.next().charAt(0);
+    System.out.print("Gender (M/F): ");
+    char gender = sc.next().charAt(0);
 
-        // BMRate calculation
-        double bmr = (gender == 'M' || gender == 'm')
-                ? 10 * weight + 6.25 * height - 5 * age + 5
-                : 10 * weight + 6.25 * height - 5 * age - 161;
+    /*
+     * Step 1: Calculate BMR (Basal Metabolic Rate)
+     * This is the number of calories needed at rest
+     */
+    double bmr = (gender == 'M' || gender == 'm')
+            ? 10 * weight + 6.25 * height - 5 * age + 5
+            : 10 * weight + 6.25 * height - 5 * age - 161;
 
-        // Daily calorie requirement
-        calorieGoal = (int) (bmr * 1.2);
+    /*
+     * Step 2: Calculate maintenance calories
+     * Activity factor = 1.2 (sedentary)
+     */
+    int maintenanceCalories = (int) (bmr * 1.2);
 
-        // BMI calculation
-        double heightM = height / 100;
-        bmi = weight / (heightM * heightM);
+    /*
+     * Step 3: Ask user goal
+     */
+    System.out.println("\nWhat is your goal?");
+    System.out.println("1. Lose Weight");
+    System.out.println("2. Maintain Weight");
+    System.out.println("3. Gain Weight");
+    System.out.print("Select option: ");
 
-        // Display health summary
-        System.out.println("\n----- HEALTH SUMMARY -----");
-        System.out.println("Daily Calorie Goal : " + calorieGoal + " kcal");
-        System.out.println("BMI                : " + String.format("%.2f", bmi));
+    int goalChoice = sc.nextInt();
+
+    /*
+     * Step 4: Adjust calories based on goal
+     */
+    switch (goalChoice) {
+        case 1:
+            userGoal = "Lose Weight";
+            calorieGoal = maintenanceCalories - 500;
+            break;
+        case 2:
+            userGoal = "Maintain Weight";
+            calorieGoal = maintenanceCalories;
+            break;
+        case 3:
+            userGoal = "Gain Weight";
+            calorieGoal = maintenanceCalories + 500;
+            break;
+        default:
+            userGoal = "Maintain Weight";
+            calorieGoal = maintenanceCalories;
     }
+
+    /*
+     * Step 5: Calculate BMI
+     */
+    double heightM = height / 100;
+    bmi = weight / (heightM * heightM);
+
+    /*
+     * Step 6: Display health summary
+     */
+    System.out.println("\n----- HEALTH SUMMARY -----");
+    System.out.println("Goal               : " + userGoal);
+    System.out.println("Daily Calorie Goal : " + calorieGoal + " kcal");
+    System.out.println("BMI                : " + String.format("%.2f", bmi));
+}
+
 
     // ================= ADD FOOD ENTRY =================
     /*
