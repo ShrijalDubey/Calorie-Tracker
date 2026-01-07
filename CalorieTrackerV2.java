@@ -1,240 +1,162 @@
 import java.util.Scanner;
 
-/*
- * CalorieTracker
- * --------------
- * A console-based calorie tracking system.
- * The program allows a user to:
- *  - Set up health details (age, height, weight, gender)
- *  - Automatically calculate BMI and daily calorie goal
- *  - Log foods consumed from a predefined Indian food database
- *  - Track calories meal-wise
- *  - View, remove, and analyze calorie consumption
- */
-
 class CalorieTrackerV2 {
 
-    // Maximum number of food entries user can log
     static final int MAX = 100;
 
-    // Arrays to store user food log details
-    static String[] foodName = new String[MAX];   // Stores food names eaten
-    static int[] calories = new int[MAX];         // Stores calories consumed
-    static String[] mealType = new String[MAX];   // Stores meal type (Breakfast/Lunch/etc)
-    static int count = 0;                         // Number of logged food entries
+    // ================= USER LOG ARRAYS =================
+    static String[] foodName = new String[MAX];
+    static int[] calories = new int[MAX];
+    static int[] protein = new int[MAX];
+    static int[] carbs = new int[MAX];
+    static int[] fat = new int[MAX];
+    static String[] mealType = new String[MAX];
+    static int count = 0;
 
-    // Scanner object for user input
     static Scanner sc = new Scanner(System.in);
 
-    // Variables to store calculated health data
-    static int calorieGoal;   // Daily calorie requirement
-    static double bmi;      // Body Mass Index
-    static String userGoal;   // Lose / Maintain / Gain
-
+    // ================= USER GOALS =================
+    static int calorieGoal, proteinGoal, carbGoal, fatGoal;
+    static double bmi;
+    static String userGoal;
 
     // ================= FOOD DATABASE =================
-    /*
-     * foodDB[] contains names of common Indian foods.
-     * foodDBCalories[] contains calories corresponding to each food.
-     * IMPORTANT:
-     *   Index of foodDB[i] matches index of foodDBCalories[i]
-     */
     static String[] foodDB = {
         "roti","chapati","rice","dal","paneer","samosa","idli","dosa","poha","upma",
         "biryani","curd","butter chicken","rajma","chole","pav bhaji","vada pav","paratha",
-        "khichdi","pulao","aloo sabzi","palak paneer","veg curry","naan","fried rice","jeera rice",
-        "lemon rice","coconut rice","masala dosa","uttapam","pongal","rasam","sambar","avial","kootu",
-        "thepla","dhokla","handvo","undhiyu","misal pav","pani puri","bhel puri","sev puri",
-        "ragda pattice","veg sandwich","cheese sandwich","grilled sandwich","veg burger","veg pizza",
-        "cheese pizza","french fries","veg momos","fried momos","steam momos","egg curry","egg bhurji",
-        "omelette","boiled egg","chicken curry","chicken biryani","chicken fried rice","chicken tikka",
-        "chicken roll","chicken sandwich","fish curry","fish fry","prawn curry","prawn fry",
-        "mutton curry","mutton biryani","keema","tea","coffee","milk","lassi","buttermilk","banana",
-        "apple","orange","mango","papaya","watermelon","bread","brown bread","butter","jam","peanut butter",
-        "biscuits","cake","pastry","chocolate","ice cream","kulfi","gulab jamun","rasgulla","jalebi",
-        "kheer","halwa","laddu","barfi","mysore pak","bhindi sabzi","aloo paratha","gobi paratha",
-        "paneer paratha","veg pulao","veg biryani","curd rice","tomato rice","tamarind rice",
-        "veg fried noodles","hakka noodles","manchurian","veg manchow soup","sweet corn soup","dal makhani",
-        "dal tadka","mix veg","lauki sabzi","tinda sabzi","karela sabzi","matar paneer","shahi paneer",
-        "paneer bhurji","soyabean sabzi","chana masala","sprouts salad","fruit salad","veg cutlet",
-        "veg pakora","onion pakora","bread pakora","paneer pakora","aloo tikki","dahi puri",
-        "sev tameta","pattice","samosa chaat","kachori","kachori chaat","poori","bhature",
-        "chole bhature","puri bhaji","veg frankie","paneer frankie","egg roll","chicken roll double",
-        "shawarma","falafel wrap","veg spring roll","chicken soup","tomato soup","veg clear soup",
-        "cornflakes","oats","upma oats","vegetable omelette","egg sandwich","paneer sandwich",
-        "chicken sandwich grilled","veg puff","egg puff","paneer puff","banana shake",
-        "mango shake","chocolate shake","cold coffee","badam milk","sugarcane juice",
-        "coconut water","lemon soda","soft drink","energy drink","protein bar","granola bar",
-        "dry fruits mix","roasted chana","makhana roasted","peanuts roasted","boiled corn"
+        "khichdi","pulao","aloo sabzi","palak paneer","veg curry","naan","fried rice",
+        "jeera rice","lemon rice","coconut rice","masala dosa","uttapam"
     };
 
-    // Calories per standard serving for each food item
     static int[] foodDBCalories = {
-        100,100,200,150,250,300,60,180,120,170,350,80,400,240,260,380,
-        290,220,180,230,150,260,200,260,250,230,240,260,
-        280,250,220,40,180,200,180,120,150,260,350,320,150,
-        200,220,280,180,220,240,300,350,400,320,200,240,180,
-        180,200,120,80,280,350,300,260,300,280,220,240,
-        260,280,350,420,300,30,40,60,120,40,90,80,60,150,60,40,
-        70,60,100,40,90,120,250,300,200,200,220,150,180,160,200,220,180,190,
-        210,120,320,300,350,240,280,220,230,210,
-        300,320,330,150,180,320,240,200,100,90,110,280,360,300,220,
-        260,180,120,200,280,300,350,360,220,180,200,
-        250,300,180,220,180,420,450,380,280,320,280,350,400,330,260,150,90,
-        80,110,160,180,200,280,260,300,180,220,240,
-        250,300,350,180,220,120,40,100,150,140,250,
-        180,120,90,170,140
+        100,100,200,150,250,300,60,180,120,170,
+        350,80,400,240,260,380,290,220,
+        180,230,150,260,200,260,250,
+        230,240,260,280,250
     };
 
-    // Stores size of the food database for search operations
+    static int[] foodDBProtein = {
+        3,3,4,9,18,6,2,6,3,4,
+        12,4,26,15,14,10,7,6,
+        8,7,3,18,6,5,7,
+        4,4,4,6,5
+    };
+
+    static int[] foodDBCarbs = {
+        20,20,45,25,8,30,12,35,25,30,
+        55,6,5,30,35,40,35,30,
+        35,40,20,10,30,45,50,
+        45,48,50,40,38
+    };
+
+    static int[] foodDBFat = {
+        1,1,1,4,20,15,1,6,3,5,
+        8,3,30,6,5,18,12,8,
+        5,6,4,18,8,5,6,
+        4,4,5,6,5
+    };
+
     static int foodDBSize = foodDB.length;
 
-    // ================= MAIN METHOD =================
+    // ================= MAIN =================
     public static void main(String[] args) {
 
-        // Program banner
-        System.out.println("=================================");
-        System.out.println("      CALORIE TRACKER SYSTEM      ");
-        System.out.println("=================================");
+        System.out.println("╔══════════════════════════════════════╗");
+        System.out.println("║           CALORIE TRACKER            ║");
+        System.out.println("╚══════════════════════════════════════╝");
 
-        // Collect health data and calculate BMI & calorie goal
         setupUserHealth();
 
         int choice;
-
-        // Menu-driven loop
         do {
-            System.out.println("\n----------- MAIN MENU -----------");
-            System.out.println("1. Add Food Entry");
-            System.out.println("2. Remove Food Entry");
-            System.out.println("3. View All Entries");
-            System.out.println("4. Total Calories Consumed");
-            System.out.println("5. Remaining Calories");
-            System.out.println("6. Exit");
-            System.out.print("Choose an option: ");
+            System.out.println("\n╔═════════════ MAIN MENU ══════════════╗");
+            System.out.println("║ 1  =>  Add Food Entry                ║");
+            System.out.println("║ 2  =>  Remove Food Entry             ║");
+            System.out.println("║ 3  =>  View Food Log                 ║");
+            System.out.println("║ 4  =>  Daily Totals                  ║");
+            System.out.println("║ 5  =>  Remaining Goals               ║");
+            System.out.println("║ 6  =>  Exit                          ║");
+            System.out.println("╚══════════════════════════════════════╝");
+            System.out.print("Select option: ");
 
             choice = sc.nextInt();
-            sc.nextLine(); // clear buffer
+            sc.nextLine();
 
-            // Perform operation based on user choice
             switch (choice) {
                 case 1 -> addEntry();
                 case 2 -> removeEntry();
                 case 3 -> viewEntries();
-                case 4 -> totalCalories();
+                case 4 -> totalMacros();
                 case 5 -> remainingCalories();
                 case 6 -> System.out.println("\nThank you for using Calorie Tracker.");
-                default -> System.out.println("Invalid choice. Try again.");
+                default -> System.out.println("Invalid choice.");
             }
         } while (choice != 6);
     }
 
-    // ================= USER HEALTH SETUP =================
-    /*
-     * Takes user details once and calculates:
-     *  - Daily calorie goal using BMR formula
-     *  - BMI using weight and height
-     */
+    // Collects user data and calculates calorie & macro goals
     static void setupUserHealth() {
 
-    System.out.println("\n------- USER HEALTH DETAILS -------");
+        System.out.println("\n──────── USER DETAILS ────────");
+        System.out.print("Age (years): ");
+        int age = sc.nextInt();
 
-    System.out.print("Age: ");
-    int age = sc.nextInt();
+        System.out.print("Weight (kg): ");
+        double weight = sc.nextDouble();
 
-    System.out.print("Weight (kg): ");
-    double weight = sc.nextDouble();
+        System.out.print("Height (cm): ");
+        double height = sc.nextDouble();
 
-    System.out.print("Height (cm): ");
-    double height = sc.nextDouble();
+        System.out.print("Gender (M/F): ");
+        char gender = sc.next().charAt(0);
 
-    System.out.print("Gender (M/F): ");
-    char gender = sc.next().charAt(0);
+        double bmr = (gender == 'M' || gender == 'm')
+                ? 10 * weight + 6.25 * height - 5 * age + 5
+                : 10 * weight + 6.25 * height - 5 * age - 161;
 
-    /*
-     * Step 1: Calculate BMR (Basal Metabolic Rate)
-     * This is the number of calories needed at rest
-     */
-    double bmr = (gender == 'M' || gender == 'm')
-            ? 10 * weight + 6.25 * height - 5 * age + 5
-            : 10 * weight + 6.25 * height - 5 * age - 161;
+        int maintenance = (int)(bmr * 1.2);
 
-    /*
-     * Step 2: Calculate maintenance calories
-     * Activity factor = 1.2 (sedentary)
-     */
-    int maintenanceCalories = (int) (bmr * 1.2);
+        System.out.println("\nChoose Goal:");
+        System.out.println("1 => Lose Weight");
+        System.out.println("2 => Maintain Weight");
+        System.out.println("3 => Gain Weight");
+        System.out.print("Choice: ");
+        int g = sc.nextInt();
 
-    /*
-     * Step 3: Ask user goal
-     */
-    System.out.println("\nWhat is your goal?");
-    System.out.println("1. Lose Weight");
-    System.out.println("2. Maintain Weight");
-    System.out.println("3. Gain Weight");
-    System.out.print("Select option: ");
+        calorieGoal = (g == 1) ? maintenance - 500 :
+                      (g == 3) ? maintenance + 500 :
+                      maintenance;
 
-    int goalChoice = sc.nextInt();
+        userGoal = (g == 1) ? "Lose" : (g == 3) ? "Gain" : "Maintain";
 
-    /*
-     * Step 4: Adjust calories based on goal
-     */
-    switch (goalChoice) {
-        case 1:
-            userGoal = "Lose Weight";
-            calorieGoal = maintenanceCalories - 500;
-            break;
-        case 2:
-            userGoal = "Maintain Weight";
-            calorieGoal = maintenanceCalories;
-            break;
-        case 3:
-            userGoal = "Gain Weight";
-            calorieGoal = maintenanceCalories + 500;
-            break;
-        default:
-            userGoal = "Maintain Weight";
-            calorieGoal = maintenanceCalories;
+        proteinGoal = (int)((calorieGoal * 0.20) / 4);
+        carbGoal    = (int)((calorieGoal * 0.50) / 4);
+        fatGoal     = (int)((calorieGoal * 0.30) / 9);
+
+        bmi = weight / Math.pow(height / 100, 2);
+
+        System.out.println("\n╔══════════ DAILY GOALS ══════════╗");
+        System.out.println("Goal      : " + userGoal);
+        System.out.println("Calories  : " + calorieGoal + " kcal");
+        System.out.println("Protein   : " + proteinGoal + " g");
+        System.out.println("Carbs     : " + carbGoal + " g");
+        System.out.println("Fat       : " + fatGoal + " g");
+        System.out.println("BMI       : " + String.format("%.2f", bmi));
+        System.out.println("╚═════════════════════════════════╝");
     }
 
-    /*
-     * Step 5: Calculate BMI
-     */
-    double heightM = height / 100;
-    bmi = weight / (heightM * heightM);
-
-    /*
-     * Step 6: Display health summary
-     */
-    System.out.println("\n----- HEALTH SUMMARY -----");
-    System.out.println("Goal               : " + userGoal);
-    System.out.println("Daily Calorie Goal : " + calorieGoal + " kcal");
-    System.out.println("BMI                : " + String.format("%.2f", bmi));
-}
-
-
-    // ================= ADD FOOD ENTRY =================
-    /*
-     * Allows user to log a food item.
-     * Steps:
-     *  - Search food in database
-     *  - Take quantity and meal type
-     *  - Calculate calories
-     *  - Store in arrays
-     */
+    // Adds food entry and shows summary
     static void addEntry() {
 
         if (count >= MAX) {
-            System.out.println("Food log is full.");
+            System.out.println("Food log full.");
             return;
         }
 
-        System.out.print("\nEnter food name: ");
-        String userFood = sc.nextLine().toLowerCase();
+        System.out.print("\nFood name: ");
+        String userFood = sc.nextLine();
 
         int index = -1;
-
-        // Linear search for food in database
         for (int i = 0; i < foodDBSize; i++) {
             if (foodDB[i].equalsIgnoreCase(userFood)) {
                 index = i;
@@ -247,99 +169,112 @@ class CalorieTrackerV2 {
             return;
         }
 
-        System.out.print("Enter quantity: ");
+        System.out.print("Quantity (servings): ");
         int qty = sc.nextInt();
 
-        System.out.println("Meal Type:");
-        System.out.println("1. Breakfast  2. Lunch  3. Dinner  4. Snacks");
-        System.out.print("Select meal type: ");
-        int meal = sc.nextInt();
+        System.out.println("Meal Type: 1 Breakfast | 2 Lunch | 3 Dinner | 4 Snacks");
+        int m = sc.nextInt();
         sc.nextLine();
 
-        mealType[count] = switch (meal) {
-            case 1 -> "Breakfast";
-            case 2 -> "Lunch";
-            case 3 -> "Dinner";
-            default -> "Snacks";
-        };
+        mealType[count] = (m == 1) ? "Breakfast" :
+                          (m == 2) ? "Lunch" :
+                          (m == 3) ? "Dinner" : "Snacks";
 
-        // Calculate total calories for this entry
-        int loggedCalories = foodDBCalories[index] * qty;
-
+        calories[count] = foodDBCalories[index] * qty;
+        protein[count]  = foodDBProtein[index] * qty;
+        carbs[count]    = foodDBCarbs[index] * qty;
+        fat[count]      = foodDBFat[index] * qty;
         foodName[count] = foodDB[index];
-        calories[count] = loggedCalories;
+
         count++;
 
-        // Confirmation message
-        System.out.println("\n✔ Food logged successfully!");
-        System.out.println("➤ Food      : " + userFood);
-        System.out.println("➤ Calories  : " + loggedCalories + " kcal");
+        // ===== BEAUTIFUL FOOD SUMMARY =====
+        System.out.println("\n╔══════════ FOOD ADDED ══════════╗");
+        System.out.println("Food     : " + foodName[count - 1]);
+        System.out.println("Meal     : " + mealType[count - 1]);
+        System.out.println("Calories : " + calories[count - 1] + " kcal");
+        System.out.println("Protein  : " + protein[count - 1] + " g");
+        System.out.println("Carbs    : " + carbs[count - 1] + " g");
+        System.out.println("Fat      : " + fat[count - 1] + " g");
+        System.out.println("╚════════════════════════════════╝");
     }
 
-    // ================= REMOVE ENTRY =================
-    /*
-     * Removes a food entry by shifting array elements
-     */
+    // Removes food entry
     static void removeEntry() {
-        if (count == 0) {
-            System.out.println("No entries to remove.");
-            return;
-        }
+        if (count == 0) return;
 
         viewEntries();
-        System.out.print("Enter entry number to remove: ");
+        System.out.print("Entry number to remove: ");
         int idx = sc.nextInt() - 1;
 
-        if (idx < 0 || idx >= count) {
-            System.out.println("Invalid entry number.");
-            return;
-        }
+        if (idx < 0 || idx >= count) return;
 
         for (int i = idx; i < count - 1; i++) {
             foodName[i] = foodName[i + 1];
             calories[i] = calories[i + 1];
+            protein[i] = protein[i + 1];
+            carbs[i] = carbs[i + 1];
+            fat[i] = fat[i + 1];
             mealType[i] = mealType[i + 1];
         }
         count--;
 
-        System.out.println("Entry removed successfully.");
+        System.out.println("Entry removed.");
     }
 
-    // ================= VIEW ENTRIES =================
-    /*
-     * Displays all logged food items with meal type and calories
-     */
+    // Displays food log
     static void viewEntries() {
         if (count == 0) {
-            System.out.println("No food entries yet.");
+            System.out.println("No food logged yet.");
             return;
         }
 
-        System.out.println("\n------- FOOD LOG -------");
+        System.out.println("\n════════ FOOD LOG ════════");
         for (int i = 0; i < count; i++) {
-            System.out.println((i + 1) + ". " + mealType[i] +
-                    " | " + foodName[i] +
-                    " | " + calories[i] + " kcal");
+            System.out.println(
+                (i + 1) + ". " + mealType[i] +
+                " | " + foodName[i] +
+                " | " + calories[i] + " kcal" +
+                " | P:" + protein[i] +
+                " C:" + carbs[i] +
+                " F:" + fat[i]
+            );
         }
     }
 
-    // ================= TOTAL CALORIES =================
-    /*
-     * Calculates total calories consumed so far
-     */
-    static void totalCalories() {
-        int sum = 0;
-        for (int i = 0; i < count; i++) sum += calories[i];
-        System.out.println("Total Calories Consumed: " + sum + " kcal");
+    // Shows total intake
+    static void totalMacros() {
+        int c = 0, p = 0, cb = 0, f = 0;
+        for (int i = 0; i < count; i++) {
+            c += calories[i];
+            p += protein[i];
+            cb += carbs[i];
+            f += fat[i];
+        }
+
+        System.out.println("\n╔════════ DAILY TOTAL ════════╗");
+        System.out.println("Calories : " + c + " / " + calorieGoal);
+        System.out.println("Protein  : " + p + " / " + proteinGoal);
+        System.out.println("Carbs    : " + cb + " / " + carbGoal);
+        System.out.println("Fat      : " + f + " / " + fatGoal);
+        System.out.println("╚═════════════════════════════╝");
     }
 
-    // ================= REMAINING CALORIES =================
-    /*
-     * Calculates remaining calories based on daily goal
-     */
+    // Shows remaining goals
     static void remainingCalories() {
-        int sum = 0;
-        for (int i = 0; i < count; i++) sum += calories[i];
-        System.out.println("Remaining Calories: " + (calorieGoal - sum) + " kcal");
+        int c = 0, p = 0, cb = 0, f = 0;
+        for (int i = 0; i < count; i++) {
+            c += calories[i];
+            p += protein[i];
+            cb += carbs[i];
+            f += fat[i];
+        }
+
+        System.out.println("\n╔══════ REMAINING ══════╗");
+        System.out.println("Calories : " + (calorieGoal - c));
+        System.out.println("Protein  : " + (proteinGoal - p));
+        System.out.println("Carbs    : " + (carbGoal - cb));
+        System.out.println("Fat      : " + (fatGoal - f));
+        System.out.println("╚═══════════════════════╝");
     }
 }
