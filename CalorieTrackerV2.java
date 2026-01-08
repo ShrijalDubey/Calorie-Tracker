@@ -145,58 +145,67 @@ class CalorieTrackerV2 {
         System.out.println("╚═════════════════════════════════╝");
     }
 
-    // Adds food entry and shows summary
+    // Adds food entry and loops until user exits
     static void addEntry() {
 
-        if (count >= MAX) {
-            System.out.println("Food log full.");
-            return;
-        }
+        char again;
+        do {
 
-        System.out.print("\nFood name: ");
-        String userFood = sc.nextLine();
-
-        int index = -1;
-        for (int i = 0; i < foodDBSize; i++) {
-            if (foodDB[i].equalsIgnoreCase(userFood)) {
-                index = i;
-                break;
+            if (count >= MAX) {
+                System.out.println("Food log full.");
+                return;
             }
-        }
 
-        if (index == -1) {
-            System.out.println("Food not found in database.");
-            return;
-        }
+            System.out.print("\nFood name: ");
+            String userFood = sc.nextLine();
 
-        System.out.print("Quantity (servings): ");
-        int qty = sc.nextInt();
+            int index = -1;
+            for (int i = 0; i < foodDBSize; i++) {
+                if (foodDB[i].equalsIgnoreCase(userFood)) {
+                    index = i;
+                    break;
+                }
+            }
 
-        System.out.println("Meal Type: 1 Breakfast | 2 Lunch | 3 Dinner | 4 Snacks");
-        int m = sc.nextInt();
-        sc.nextLine();
+            if (index == -1) {
+                System.out.println("Food not found in database.");
+            } else {
 
-        mealType[count] = (m == 1) ? "Breakfast" :
-                          (m == 2) ? "Lunch" :
-                          (m == 3) ? "Dinner" : "Snacks";
+                System.out.print("Quantity (servings): ");
+                int qty = sc.nextInt();
 
-        calories[count] = foodDBCalories[index] * qty;
-        protein[count]  = foodDBProtein[index] * qty;
-        carbs[count]    = foodDBCarbs[index] * qty;
-        fat[count]      = foodDBFat[index] * qty;
-        foodName[count] = foodDB[index];
+                System.out.println("Meal Type: 1 Breakfast | 2 Lunch | 3 Dinner | 4 Snacks");
+                int m = sc.nextInt();
+                sc.nextLine();
 
-        count++;
+                mealType[count] = (m == 1) ? "Breakfast" :
+                                  (m == 2) ? "Lunch" :
+                                  (m == 3) ? "Dinner" : "Snacks";
 
-        // ===== BEAUTIFUL FOOD SUMMARY =====
-        System.out.println("\n╔══════════ FOOD ADDED ══════════╗");
-        System.out.println("Food     : " + foodName[count - 1]);
-        System.out.println("Meal     : " + mealType[count - 1]);
-        System.out.println("Calories : " + calories[count - 1] + " kcal");
-        System.out.println("Protein  : " + protein[count - 1] + " g");
-        System.out.println("Carbs    : " + carbs[count - 1] + " g");
-        System.out.println("Fat      : " + fat[count - 1] + " g");
-        System.out.println("╚════════════════════════════════╝");
+                calories[count] = foodDBCalories[index] * qty;
+                protein[count]  = foodDBProtein[index] * qty;
+                carbs[count]    = foodDBCarbs[index] * qty;
+                fat[count]      = foodDBFat[index] * qty;
+                foodName[count] = foodDB[index];
+
+                count++;
+
+                System.out.println("\n╔══════════ FOOD ADDED ══════════╗");
+                System.out.println("Food     : " + foodName[count - 1]);
+                System.out.println("Meal     : " + mealType[count - 1]);
+                System.out.println("Calories : " + calories[count - 1] + " kcal");
+                System.out.println("Protein  : " + protein[count - 1] + " g");
+                System.out.println("Carbs    : " + carbs[count - 1] + " g");
+                System.out.println("Fat      : " + fat[count - 1] + " g");
+                System.out.println("╚════════════════════════════════╝");
+            }
+
+            System.out.println("\n──────────────────────────────");
+            System.out.print("Add more food? (Y/N): ");
+            again = sc.next().charAt(0);
+            sc.nextLine();
+
+        } while (again == 'Y' || again == 'y');
     }
 
     // Removes food entry

@@ -1,82 +1,42 @@
 import java.util.Scanner;
 
-/* ================= USER BASE CLASS ================= */
-class User {
+class FoodItem {
+    String name;
+    int calories;
+    int protein;
+    int carbs;
+    int fat;
+}
+
+class FoodLog extends FoodItem {
+    String mealType;
+
+    FoodLog(String name, int calories, int protein, int carbs, int fat, String mealType) {
+        this.name = name;
+        this.calories = calories;
+        this.protein = protein;
+        this.carbs = carbs;
+        this.fat = fat;
+        this.mealType = mealType;
+    }
+}
+
+class CalorieTracker {
+
+    static final int MAX = 100;
+
+    // ================= USER LOG ARRAYS =================
+    static FoodLog[] logs = new FoodLog[MAX];
+    static int count = 0;
+
+    static Scanner sc = new Scanner(System.in);
+
+    // ================= USER GOALS =================
     static int calorieGoal, proteinGoal, carbGoal, fatGoal;
     static double bmi;
     static String userGoal;
 
-    void setupUserHealth(Scanner sc) {
-
-        System.out.println("\n──────── USER DETAILS ────────");
-        System.out.print("Age (years): ");
-        int age = sc.nextInt();
-
-        System.out.print("Weight (kg): ");
-        double weight = sc.nextDouble();
-
-        System.out.print("Height (cm): ");
-        double height = sc.nextDouble();
-
-        System.out.print("Gender (M/F): ");
-        char gender = sc.next().charAt(0);
-
-        double bmr = (gender == 'M' || gender == 'm')
-                ? 10 * weight + 6.25 * height - 5 * age + 5
-                : 10 * weight + 6.25 * height - 5 * age - 161;
-
-        int maintenance = (int)(bmr * 1.2);
-
-        System.out.println("\nChoose Goal:");
-        System.out.println("1 => Lose Weight");
-        System.out.println("2 => Maintain Weight");
-        System.out.println("3 => Gain Weight");
-        System.out.print("Choice: ");
-        int g = sc.nextInt();
-
-        calorieGoal = (g == 1) ? maintenance - 500 :
-                      (g == 3) ? maintenance + 500 :
-                      maintenance;
-
-        userGoal = (g == 1) ? "Lose" : (g == 3) ? "Gain" : "Maintain";
-
-        proteinGoal = (int)((calorieGoal * 0.20) / 4);
-        carbGoal    = (int)((calorieGoal * 0.50) / 4);
-        fatGoal     = (int)((calorieGoal * 0.30) / 9);
-
-        bmi = weight / Math.pow(height / 100, 2);
-
-        System.out.println("\n╔══════════ DAILY GOALS ══════════╗");
-        System.out.println("Goal      : " + userGoal);
-        System.out.println("Calories  : " + calorieGoal + " kcal");
-        System.out.println("Protein   : " + proteinGoal + " g");
-        System.out.println("Carbs     : " + carbGoal + " g");
-        System.out.println("Fat       : " + fatGoal + " g");
-        System.out.println("BMI       : " + String.format("%.2f", bmi));
-        System.out.println("╚═════════════════════════════════╝");
-    }
-}
-
-/* ================= FOOD LOG CLASS ================= */
-class FoodLog {
-    static final int MAX = 100;
-
-    String[] foodName = new String[MAX];
-    int[] calories = new int[MAX];
-    int[] protein = new int[MAX];
-    int[] carbs = new int[MAX];
-    int[] fat = new int[MAX];
-    String[] mealType = new String[MAX];
-    int count = 0;
-}
-
-/* ================= MAIN TRACKER ================= */
-public class CalorieTracker extends User {
-
-    static Scanner sc = new Scanner(System.in);
-    static FoodLog log = new FoodLog();
-
-    // ===== FOOD DATABASE =====
+    // ================= FOOD DATABASE =================
     static String[] foodDB = {
         "roti","chapati","rice","dal","paneer","samosa","idli","dosa","poha","upma",
         "biryani","curd","butter chicken","rajma","chole","pav bhaji","vada pav","paratha",
@@ -114,19 +74,19 @@ public class CalorieTracker extends User {
 
     static int foodDBSize = foodDB.length;
 
+    // ================= MAIN =================
     public static void main(String[] args) {
-
-        CalorieTrackerV2 tracker = new CalorieTrackerV2();
 
         System.out.println("╔══════════════════════════════════════╗");
         System.out.println("║           CALORIE TRACKER            ║");
         System.out.println("╚══════════════════════════════════════╝");
 
-        tracker.setupUserHealth();
+        setupUserHealth();
 
         int choice;
         do {
-            System.out.println("\n╔═════════════ MAIN MENU ══════════════╗");
+            System.out.println();
+            System.out.println("╔═════════════ MAIN MENU ══════════════╗");
             System.out.println("║ 1  =>  Add Food Entry                ║");
             System.out.println("║ 2  =>  Remove Food Entry             ║");
             System.out.println("║ 3  =>  View Food Log                 ║");
@@ -145,106 +105,201 @@ public class CalorieTracker extends User {
                 case 3 -> viewEntries();
                 case 4 -> totalMacros();
                 case 5 -> remainingCalories();
+                case 6 -> System.out.println("\nThank you for using Calorie Tracker.");
+                default -> System.out.println("Invalid choice.");
             }
         } while (choice != 6);
-
-        System.out.println("\nThank you for using Calorie Tracker.");
     }
 
-    // ===== METHODS (UNCHANGED) =====
+    // Collects user data and calculates calorie & macro goals
+    static void setupUserHealth() {
+        System.out.println();
+        System.out.println("──────── USER DETAILS ────────");
+        System.out.print("Age (years): ");
+        int age = sc.nextInt();
+
+        System.out.print("Weight (kg): ");
+        double weight = sc.nextDouble();
+
+        System.out.print("Height (cm): ");
+        double height = sc.nextDouble();
+
+        System.out.print("Gender (M/F): ");
+        char gender = sc.next().charAt(0);
+
+        double bmr = (gender == 'M' || gender == 'm')
+                ? 10 * weight + 6.25 * height - 5 * age + 5
+                : 10 * weight + 6.25 * height - 5 * age - 161;
+
+        int maintenance = (int)(bmr * 1.2);
+        System.out.println();
+        System.out.println("Choose Goal:");
+        System.out.println("1 => Lose Weight");
+        System.out.println("2 => Maintain Weight");
+        System.out.println("3 => Gain Weight");
+        System.out.print("Choice: ");
+        int g = sc.nextInt();
+
+        calorieGoal = (g == 1) ? maintenance - 500 :
+                      (g == 3) ? maintenance + 500 :
+                      maintenance;
+
+        userGoal = (g == 1) ? "Lose" : (g == 3) ? "Gain" : "Maintain";
+
+        proteinGoal = (int)((calorieGoal * 0.20) / 4);
+        carbGoal    = (int)((calorieGoal * 0.50) / 4);
+        fatGoal     = (int)((calorieGoal * 0.30) / 9);
+
+        bmi = weight / Math.pow(height / 100, 2);
+        System.out.println();
+        System.out.println("╔══════════ DAILY GOALS ══════════╗");
+        System.out.println("Goal      : " + userGoal);
+        System.out.println("Calories  : " + calorieGoal + " kcal");
+        System.out.println("Protein   : " + proteinGoal + " g");
+        System.out.println("Carbs     : " + carbGoal + " g");
+        System.out.println("Fat       : " + fatGoal + " g");
+        System.out.println("BMI       : " + String.format("%.2f", bmi));
+        System.out.println("╚═════════════════════════════════╝");
+    }
+
+    // Adds food entry and loops until user exits
     static void addEntry() {
-        if (log.count >= FoodLog.MAX) return;
 
-        System.out.print("\nFood name: ");
-        String userFood = sc.nextLine();
+        char again;
+        do {
 
-        int index = -1;
-        for (int i = 0; i < foodDBSize; i++) {
-            if (foodDB[i].equalsIgnoreCase(userFood)) {
-                index = i;
-                break;
+            if (count >= MAX) {
+                System.out.println("Food log full.");
+                return;
             }
-        }
-        if (index == -1) return;
+            System.out.println();
+            System.out.print("Food name: ");
+            String userFood = sc.nextLine();
 
-        System.out.print("Quantity: ");
-        int qty = sc.nextInt();
+            int index = -1;
+            for (int i = 0; i < foodDBSize; i++) {
+                if (foodDB[i].equalsIgnoreCase(userFood)) {
+                    index = i;
+                    break;
+                }
+            }
 
-        System.out.println("Meal Type: 1 Breakfast | 2 Lunch | 3 Dinner | 4 Snacks");
-        int m = sc.nextInt();
-        sc.nextLine();
+            if (index == -1) {
+                System.out.println("Food not found in database.");
+            } else {
 
-        log.mealType[log.count] =
-                (m == 1) ? "Breakfast" :
-                (m == 2) ? "Lunch" :
-                (m == 3) ? "Dinner" : "Snacks";
+                System.out.print("Quantity (servings): ");
+                int qty = sc.nextInt();
 
-        log.foodName[log.count] = foodDB[index];
-        log.calories[log.count] = foodDBCalories[index] * qty;
-        log.protein[log.count]  = foodDBProtein[index] * qty;
-        log.carbs[log.count]    = foodDBCarbs[index] * qty;
-        log.fat[log.count]      = foodDBFat[index] * qty;
+                System.out.println("Meal Type: 1 Breakfast | 2 Lunch | 3 Dinner | 4 Snacks");
+                int m = sc.nextInt();
+                sc.nextLine();
 
-        System.out.println("\n╔══════════ FOOD ADDED ══════════╗");
-        System.out.println("Food     : " + log.foodName[log.count]);
-        System.out.println("Calories : " + log.calories[log.count]);
-        System.out.println("Protein  : " + log.protein[log.count]);
-        System.out.println("Carbs    : " + log.carbs[log.count]);
-        System.out.println("Fat      : " + log.fat[log.count]);
-        System.out.println("╚════════════════════════════════╝");
+                String meal = (m == 1) ? "Breakfast" :
+                              (m == 2) ? "Lunch" :
+                              (m == 3) ? "Dinner" : "Snacks";
 
-        log.count++;
+                logs[count++] = new FoodLog(
+                        foodDB[index],
+                        foodDBCalories[index] * qty,
+                        foodDBProtein[index] * qty,
+                        foodDBCarbs[index] * qty,
+                        foodDBFat[index] * qty,
+                        meal
+                );
+
+                FoodLog f = logs[count - 1];
+                System.out.println();
+                System.out.println("╔══════════ FOOD ADDED ══════════╗");
+                System.out.println("Food     : " + f.name);
+                System.out.println("Meal     : " + f.mealType);
+                System.out.println("Calories : " + f.calories + " kcal");
+                System.out.println("Protein  : " + f.protein + " g");
+                System.out.println("Carbs    : " + f.carbs + " g");
+                System.out.println("Fat      : " + f.fat + " g");
+                System.out.println("╚════════════════════════════════╝");
+            }
+            System.out.println();
+            System.out.println("──────────────────────────────");
+            System.out.print("Add more food? (Y/N): ");
+            again = sc.next().charAt(0);
+            sc.nextLine();
+
+        } while (again == 'Y' || again == 'y');
     }
 
+    // Removes food entry
     static void removeEntry() {
-        if (log.count == 0) return;
+        if (count == 0) return;
+
         viewEntries();
+        System.out.print("Entry number to remove: ");
         int idx = sc.nextInt() - 1;
-        if (idx < 0 || idx >= log.count) return;
 
-        for (int i = idx; i < log.count - 1; i++) {
-            log.foodName[i] = log.foodName[i + 1];
-            log.calories[i] = log.calories[i + 1];
-            log.protein[i] = log.protein[i + 1];
-            log.carbs[i] = log.carbs[i + 1];
-            log.fat[i] = log.fat[i + 1];
-            log.mealType[i] = log.mealType[i + 1];
+        if (idx < 0 || idx >= count) return;
+
+        for (int i = idx; i < count - 1; i++) {
+            logs[i] = logs[i + 1];
         }
-        log.count--;
+        count--;
+
+        System.out.println("Entry removed.");
     }
 
+    // Displays food log
     static void viewEntries() {
-        for (int i = 0; i < log.count; i++) {
-            System.out.println((i + 1) + ". " + log.mealType[i] + " | " +
-                    log.foodName[i] + " | " + log.calories[i] + " kcal");
+        if (count == 0) {
+            System.out.println("No food logged yet.");
+            return;
+        }
+        System.out.println();
+        System.out.println("════════ FOOD LOG ════════");
+        for (int i = 0; i < count; i++) {
+            FoodLog f = logs[i];
+            System.out.println(
+                (i + 1) + ". " + f.mealType +
+                " | " + f.name +
+                " | " + f.calories + " kcal" +
+                " | P:" + f.protein +
+                " C:" + f.carbs +
+                " F:" + f.fat
+            );
         }
     }
 
+    // Shows total intake
     static void totalMacros() {
-        int c=0,p=0,cb=0,f=0;
-        for (int i=0;i<log.count;i++) {
-            c+=log.calories[i];
-            p+=log.protein[i];
-            cb+=log.carbs[i];
-            f+=log.fat[i];
+        int c = 0, p = 0, cb = 0, f = 0;
+        for (int i = 0; i < count; i++) {
+            c += logs[i].calories;
+            p += logs[i].protein;
+            cb += logs[i].carbs;
+            f += logs[i].fat;
         }
+        System.out.println();
+        System.out.println("╔════════ DAILY TOTAL ════════╗");
         System.out.println("Calories : " + c + " / " + calorieGoal);
         System.out.println("Protein  : " + p + " / " + proteinGoal);
         System.out.println("Carbs    : " + cb + " / " + carbGoal);
         System.out.println("Fat      : " + f + " / " + fatGoal);
+        System.out.println("╚═════════════════════════════╝");
     }
 
+    // Shows remaining goals
     static void remainingCalories() {
-        int c=0,p=0,cb=0,f=0;
-        for (int i=0;i<log.count;i++) {
-            c+=log.calories[i];
-            p+=log.protein[i];
-            cb+=log.carbs[i];
-            f+=log.fat[i];
+        int c = 0, p = 0, cb = 0, f = 0;
+        for (int i = 0; i < count; i++) {
+            c += logs[i].calories;
+            p += logs[i].protein;
+            cb += logs[i].carbs;
+            f += logs[i].fat;
         }
+        System.out.println();
+        System.out.println("╔══════ REMAINING ══════╗");
         System.out.println("Calories : " + (calorieGoal - c));
         System.out.println("Protein  : " + (proteinGoal - p));
         System.out.println("Carbs    : " + (carbGoal - cb));
         System.out.println("Fat      : " + (fatGoal - f));
+        System.out.println("╚═══════════════════════╝");
     }
 }
