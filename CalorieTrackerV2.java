@@ -27,7 +27,7 @@ class FoodLog extends FoodItem {
     }
 }
 
-class CalorieTrackerV2 {
+class CalorieTracker {
 
     static final int MAX = 100;
 
@@ -36,6 +36,11 @@ class CalorieTrackerV2 {
     static int count = 0;
 
     static Scanner sc = new Scanner(System.in);
+      // ================= ALL DAYS LOG =================
+    static FoodLog[] allLogs = new FoodLog[MAX];
+    static int allCount = 0;
+
+    static int dayNo = 1;
 
     // ================= USER GOALS =================
     static int calorieGoal, proteinGoal, carbGoal, fatGoal;
@@ -115,11 +120,11 @@ class CalorieTrackerV2 {
             }
         } while (choice != 7);
     }
-
+    //=======================================================
     // Collects user data and calculates calorie & macro goals
     static void setupUserHealth() {
 
-        System.out.println("\n══════════════ USER DETAILS ══════════════");
+        System.out.println("\n═════════════ USER DETAILS ═════════════");
         System.out.print("Age (years): ");
         int age = sc.nextInt();
 
@@ -179,21 +184,10 @@ class CalorieTrackerV2 {
         System.out.println("BMI       : " + String.format("%.2f", bmi));
         System.out.println("╚═════════════════════════════════╝");
     }
-
+    //===================================================
     // Adds food entry and loops until user exits
     static void addEntry() {
-        System.out.println("\n════════════════════════════════ Available Foods ════════════════════════════════");
-        for (int i = 0; i < foodDBSize; i++) {
-            System.out.printf("%-15s", foodDB[i].name);
-            if ((i + 1) % 5 == 0) System.out.println();
-        }
-        System.out.println();
-        if (count >= MAX) {
-            System.out.println("Food log full.");
-            return;
-        }
-
-        // 🔹 Ask meal FIRST
+        
         System.out.println("\nSelect Meal Type:");
         System.out.println("1 Breakfast");
         System.out.println("2 Lunch");
@@ -206,6 +200,17 @@ class CalorieTrackerV2 {
 
         if (m < 1 || m > 4) {
             System.out.println("Invalid meal type.");
+            return;
+        }
+
+        System.out.println("\nAvailable Foods:");
+        for (int i = 0; i < foodDBSize; i++) {
+            System.out.printf("%-15s", foodDB[i].name);
+            if ((i + 1) % 5 == 0) System.out.println();
+        }
+        System.out.println();
+        if (count >= MAX) {
+            System.out.println("Food log full.");
             return;
         }
 
@@ -264,15 +269,15 @@ class CalorieTrackerV2 {
                 System.out.println("╚════════════════════════════════╝");
             }
 
-            System.out.println("\n══════════════════════════════════════════════");
+            System.out.println("\n════════════════════");
             System.out.print("Add more food to " + mealType + "? (Y/N): ");
             again = sc.next().charAt(0);
             sc.nextLine();
 
         } while (again == 'Y' || again == 'y');
     }
-
-
+    //===================================================
+    // Removes food entry by index 
     static void removeEntry() {
         if (count == 0) return;
 
@@ -289,6 +294,8 @@ class CalorieTrackerV2 {
 
         System.out.println("Entry removed.");
     }
+    //===================================================
+    // Edits food quantity and updates macros accordingly
     static void editEntry() {
 
         if (count == 0) {
@@ -313,12 +320,20 @@ class CalorieTrackerV2 {
         int newQty = sc.nextInt();
         sc.nextLine();
 
-        if (newQty <= 0) {
-            System.out.println("Invalid quantity.");
+        if (newQty == 0) {
+            for (int i = idx; i < count - 1; i++) {
+                logs[i] = logs[i + 1];
+            }
+            count--;
+            System.out.println("\nQuantity set to 0. Entry removed.");
             return;
         }
 
-        // Find base food from database
+        if (newQty < 0) {
+            System.out.println("Invalid quantity. Cannot be negative.");
+            return;
+        }
+
         FoodItem base = null;
         for (int i = 0; i < foodDBSize; i++) {
             if (foodDB[i].name.equalsIgnoreCase(log.name)) {
@@ -328,26 +343,26 @@ class CalorieTrackerV2 {
         }
 
         if (base == null) {
-            System.out.println("Food not found in database.");
+            System.out.println("Error: Food original data not found.");
             return;
         }
 
-        // Recalculate values
         log.calories = base.calories * newQty;
         log.protein  = base.protein  * newQty;
         log.carbs    = base.carbs    * newQty;
         log.fat      = base.fat      * newQty;
 
-        System.out.println("\n Quantity updated successfully!");
+        System.out.println("\nQuantity updated successfully!");
     }
-
+    //===================================================
+    // Displays all food entries
     static void viewEntries() {
         if (count == 0) {
             System.out.println("No food logged yet.");
             return;
         }
 
-        System.out.println("\n══════════════════════════════ FOOD LOG ══════════════════════════════");
+        System.out.println("\n════════ FOOD LOG ════════");
         for (int i = 0; i < count; i++) {
             FoodLog f = logs[i];
             System.out.println(
@@ -360,7 +375,8 @@ class CalorieTrackerV2 {
             );
         }
     }
-
+    //===================================================
+    // Calculates and displays total macros&calories consumed
     static void totalMacros() {
         int c = 0, p = 0, cb = 0, f = 0;
         for (int i = 0; i < count; i++) {
@@ -377,7 +393,8 @@ class CalorieTrackerV2 {
         System.out.println("Fat      : " + f + " / " + fatGoal);
         System.out.println("╚═════════════════════════════╝");
     }
-
+    //===================================================
+    // Calculates and displays total macros&calories remaining
     static void remainingCalories() {
         int c = 0, p = 0, cb = 0, f = 0;
         for (int i = 0; i < count; i++) {

@@ -20,10 +20,12 @@ class FoodItem {
 /* ================= CHILD CLASS (INHERITANCE) ================= */
 class FoodLog extends FoodItem {
     String mealType;
+    int day;
 
-    FoodLog(String name, int calories, int protein, int carbs, int fat, String mealType) {
+    FoodLog(String name, int calories, int protein, int carbs, int fat, String mealType,int day) {
         super(name, calories, protein, carbs, fat);
         this.mealType = mealType;
+        this.day = day;
     }
 }
 
@@ -36,6 +38,12 @@ class CalorieTracker {
     static int count = 0;
 
     static Scanner sc = new Scanner(System.in);
+
+    // ================= ALL DAYS LOG =================
+    static FoodLog[] allLogs = new FoodLog[MAX];
+    static int allCount = 0;
+
+    static int dayNo = 1;
 
     // ================= USER GOALS =================
     static int calorieGoal, proteinGoal, carbGoal, fatGoal;
@@ -89,14 +97,17 @@ class CalorieTracker {
 
         int choice;
         do {
-            System.out.println("\n╔═════════════ MAIN MENU ══════════════╗");
+            System.out.println("\n══════════════ DAY " + dayNo + " ══════════════");
+            System.out.println("╔═════════════ MAIN MENU ══════════════╗");
             System.out.println("║ 1  =>  Add Food Entry                ║");
             System.out.println("║ 2  =>  Remove Food Entry             ║");
             System.out.println("║ 3  =>  Edit Food Quantity            ║");
-            System.out.println("║ 4  =>  View Food Log                 ║");
+            System.out.println("║ 4  =>  View Food Log (Today)         ║");
             System.out.println("║ 5  =>  Daily Totals                  ║");
             System.out.println("║ 6  =>  Remaining Goals               ║");
-            System.out.println("║ 7  =>  Exit                          ║");
+            System.out.println("║ 7  =>  Start New Day                 ║");
+            System.out.println("║ 8  =>  View All Days Log             ║");
+            System.out.println("║ 9  =>  Exit                          ║");
             System.out.println("╚══════════════════════════════════════╝");
             System.out.print("Select option: ");
 
@@ -110,10 +121,47 @@ class CalorieTracker {
                 case 4 -> viewEntries();
                 case 5 -> totalMacros();
                 case 6 -> remainingCalories();
-                case 7 -> System.out.println("\nThank you for using Calorie Tracker.");
+                case 7 -> startNewDay();
+                case 8 -> viewAllLogs();
+                case 9 -> System.out.println("\nThank you for using Calorie Tracker.");
                 default -> System.out.println("Invalid choice.");
             }
-        } while (choice != 7);
+        } while (choice != 9);
+    }
+    //=======================================================
+    //Starting new day by storing previous in allLogs
+    static void startNewDay() {
+
+        for (int i = 0; i < count; i++) {
+            allLogs[allCount++] = logs[i];
+        }
+
+        count = 0;
+        dayNo++;
+
+        System.out.println("\n════════ NEW DAY STARTED ════════");
+        System.out.println("Now tracking Day " + dayNo);
+    }
+    //=======================================================
+    //Loops through allLogs to print AllLogged food
+    static void viewAllLogs() {
+        if (allCount == 0) {
+            System.out.println("No previous day logs available.");
+            return;
+        }
+
+        System.out.println("\n══════════ ALL DAYS LOG ══════════");
+        for (int i = 0; i < allCount; i++) {
+            FoodLog f = allLogs[i];
+            System.out.println(
+                    "Day " + f.day + " | " + f.mealType +
+                            " | " + f.name +
+                            " | " + f.calories + " kcal" +
+                            " | P:" + f.protein +
+                            " C:" + f.carbs +
+                            " F:" + f.fat
+            );
+        }
     }
     //=======================================================
     // Collects user data and calculates calorie & macro goals
@@ -182,7 +230,7 @@ class CalorieTracker {
     //===================================================
     // Adds food entry and loops until user exits
     static void addEntry() {
-        
+
         System.out.println("\nSelect Meal Type:");
         System.out.println("1 Breakfast");
         System.out.println("2 Lunch");
@@ -249,7 +297,8 @@ class CalorieTracker {
                         item.protein * qty,
                         item.carbs * qty,
                         item.fat * qty,
-                        mealType
+                        mealType,
+                        dayNo
                 );
 
                 FoodLog f = logs[count - 1];
