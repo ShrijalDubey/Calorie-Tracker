@@ -50,6 +50,7 @@ class CalorieTracker {
     static double bmi;
     static String userGoal;
 
+
     // ================= FOOD DATABASE =================
     static FoodItem[] foodDB = {
             new FoodItem("roti",100,3,20,1),
@@ -85,6 +86,10 @@ class CalorieTracker {
     };
 
     static int foodDBSize = foodDB.length;
+    static int customStartIndex = foodDB.length;
+    static int currentStreak = 0;
+    static int bestStreak = 0;
+
 
     // ================= MAIN =================
     public static void main(String[] args) {
@@ -107,7 +112,8 @@ class CalorieTracker {
             System.out.println("║ 6  =>  Remaining Goals               ║");
             System.out.println("║ 7  =>  Start New Day                 ║");
             System.out.println("║ 8  =>  View All Days Log             ║");
-            System.out.println("║ 9  =>  Exit                          ║");
+            System.out.println("║ 9  =>  Add Custom Food               ║");
+            System.out.println("║ 10  =>  Exit                         ║");
             System.out.println("╚══════════════════════════════════════╝");
             System.out.print("Select option: ");
 
@@ -123,19 +129,57 @@ class CalorieTracker {
                 case 6 -> remainingCalories();
                 case 7 -> startNewDay();
                 case 8 -> viewAllLogs();
-                case 9 -> System.out.println("\nThank you for using Calorie Tracker.");
+                case 9 -> addCustomFood();
+                case 10 -> System.out.println("\nThank you for using Calorie Tracker.");
                 default -> System.out.println("Invalid choice.");
             }
-        } while (choice != 9);
+        } while (choice != 10);
     }
+    //=======================================================
+    //Adding custom food to foodDB
+    static void addCustomFood() {
+        System.out.println("\n════════ ADDING CUSTOM FOOD ════════");
+
+        System.out.print("Food name: ");
+        String n = sc.nextLine().toLowerCase().trim();
+
+        System.out.print("Calories: "); int c = sc.nextInt();
+        System.out.print("Protein: "); int p = sc.nextInt();
+        System.out.print("Carbs: "); int cb = sc.nextInt();
+        System.out.print("Fat: "); int f = sc.nextInt();
+        sc.nextLine();
+
+        foodDB = java.util.Arrays.copyOf(foodDB, foodDBSize + 1);
+        foodDB[foodDBSize] = new FoodItem(n, c, p, cb, f);
+        foodDBSize++;
+
+        System.out.println("════════ CUSTOM FOOD ADDED ════════");
+    }
+
     //=======================================================
     //Starting new day by storing previous in allLogs
     static void startNewDay() {
+        //Streak Calculation
+        if (count > 0) {
+            int c=0;
+            for (int i=0;i<count;i++) c+=logs[i].calories;
 
+            if (c <= calorieGoal) {
+                currentStreak++;
+                if (currentStreak > bestStreak)
+                    bestStreak = currentStreak;
+            } else {
+                currentStreak = 0;
+            }
+        }
+
+        System.out.println("Streak: " + currentStreak + " days | Best: " + bestStreak);
+
+        //Copy current day's logs to allLogs
         for (int i = 0; i < count; i++) {
             allLogs[allCount++] = logs[i];
         }
-
+        //Reset current day's logs
         count = 0;
         dayNo++;
 
@@ -247,10 +291,24 @@ class CalorieTracker {
         }
 
         System.out.println("\nAvailable Foods:");
-        for (int i = 0; i < foodDBSize; i++) {
+
+        /* DEFAULT FOODS */
+        for (int i = 0; i < customStartIndex; i++) {
             System.out.printf("%-15s", foodDB[i].name);
             if ((i + 1) % 5 == 0) System.out.println();
         }
+        System.out.println();
+
+        /* CUSTOM FOODS */
+        if (foodDBSize > customStartIndex) {
+            System.out.println("\nCustom Foods:");
+            for (int i = customStartIndex; i < foodDBSize; i++) {
+                System.out.printf("%-15s", foodDB[i].name);
+                if ((i - customStartIndex + 1) % 5 == 0) System.out.println();
+            }
+            System.out.println();
+        }
+
         System.out.println();
         if (count >= MAX) {
             System.out.println("Food log full.");
@@ -273,7 +331,7 @@ class CalorieTracker {
             }
 
             System.out.print("\nFood name: ");
-            String userFood = sc.nextLine();
+            String userFood = sc.nextLine().toLowerCase().trim();
 
             FoodItem item = null;
             for (int i = 0; i < foodDBSize; i++) {
@@ -284,7 +342,13 @@ class CalorieTracker {
             }
 
             if (item == null) {
-                System.out.println("Food not found in database.");
+                System.out.print("Food not found. Suggestions: ");
+                for (FoodItem f : foodDB) {
+                    if (f.name.contains(userFood.substring(0,1)))
+                        System.out.print(f.name + "  ");
+                }
+                System.out.println();
+                return;
             } else {
 
                 System.out.print("Quantity (servings): ");
@@ -436,6 +500,7 @@ class CalorieTracker {
         System.out.println("Carbs    : " + cb + " / " + carbGoal);
         System.out.println("Fat      : " + f + " / " + fatGoal);
         System.out.println("╚═════════════════════════════╝");
+        
     }
     //===================================================
     // Calculates and displays total macros&calories remaining
