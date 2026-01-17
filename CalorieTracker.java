@@ -106,14 +106,14 @@ class CalorieTracker {
             System.out.println("╔═════════════ MAIN MENU ══════════════╗");
             System.out.println("║ 1  =>  Add Food Entry                ║");
             System.out.println("║ 2  =>  Remove Food Entry             ║");
-            System.out.println("║ 3  =>  Edit Food Quantity            ║");
-            System.out.println("║ 4  =>  View Food Log (Today)         ║");
-            System.out.println("║ 5  =>  Daily Totals                  ║");
-            System.out.println("║ 6  =>  Remaining Goals               ║");
-            System.out.println("║ 7  =>  Start New Day                 ║");
-            System.out.println("║ 8  =>  View All Days Log             ║");
-            System.out.println("║ 9  =>  Add Custom Food               ║");
-            System.out.println("║ 10  =>  Exit                         ║");
+            System.out.println("║ 3  =>  Add Custom Food               ║");
+            System.out.println("║ 4  =>  Edit Food Quantity            ║");
+            System.out.println("║ 5  =>  View Food Log (Today)         ║");
+            System.out.println("║ 6  =>  View All Days Log             ║");
+            System.out.println("║ 7  =>  Daily Totals                  ║");
+            System.out.println("║ 8  =>  Remaining Goals               ║");
+            System.out.println("║ 9  =>  Start New Day                 ║");
+            System.out.println("║ 10 =>  Exit                          ║");
             System.out.println("╚══════════════════════════════════════╝");
             System.out.print("Select option: ");
 
@@ -123,13 +123,13 @@ class CalorieTracker {
             switch (choice) {
                 case 1 -> addEntry();
                 case 2 -> removeEntry();
-                case 3 -> editEntry();
-                case 4 -> viewEntries();
-                case 5 -> totalMacros();
-                case 6 -> remainingCalories();
-                case 7 -> startNewDay();
-                case 8 -> viewAllLogs();
-                case 9 -> addCustomFood();
+                case 3 -> addCustomFood();
+                case 4 -> editEntry();
+                case 5 -> viewEntries();
+                case 6 -> viewAllLogs();
+                case 7 -> totalMacros();
+                case 8 -> remainingCalories();
+                case 9 -> startNewDay();
                 case 10 -> System.out.println("\nThank you for using Calorie Tracker.");
                 default -> System.out.println("Invalid choice.");
             }
